@@ -26,4 +26,16 @@ const CardContent = React.forwardRef(({ className, ...props }, ref) => (
 ))
 CardContent.displayName = "CardContent"
 
-export { Card, CardContent }
+const Button = React.forwardRef(({ className, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-navy text-white shadow-sm w-full max-w-full overflow-y-auto",
+      className
+    )}
+    {...props}
+  />
+))
+Button.displayName = "Button"
+
+export { Card, CardContent, Button }

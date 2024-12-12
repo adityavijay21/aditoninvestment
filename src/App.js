@@ -14,16 +14,12 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <Layout>
-          <div style={{ height: '100vh', overflowY: 'auto' }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/how-we-work" element={<HowWeWork />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/testimonials" element={<Testimonials />} />
-              <Route path="/contact" element={<Contact />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/how-we-work" element={<HowWeWork />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
         </Layout>
       </Router>
     </ThemeProvider>
@@ -31,3 +27,4 @@ function App() {
 }
 
 export default App;
+

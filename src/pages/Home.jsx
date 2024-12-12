@@ -1,12 +1,17 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { motion } from 'framer-motion';
-import Globe3D from '../components/Glode3D';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Stats } from '../components/stats';
 import { Button } from '../ui/button';
+import Globe3D from '../components/Glode3D';
 import PremiumCTA from '../components/PremiumCTA';
 import Footer from '../components/Footer';
-import { ArrowRight, Globe2, Users2, ShieldCheck, HeadphonesIcon, BarChart3, Settings2, Star, CheckCircle } from 'lucide-react';
+import { ArrowRight, Globe2, Users2, ShieldCheck, HeadphonesIcon, BarChart3, Settings2, CheckCircle } from 'lucide-react'; // Removed unused import Star
 import FAQ from '../components/FAQ';
+import Testimonial from '../components/Testimonial';
+import Founders from '../components/Founders';
+import Modal from '../components/Modal';
+
+
 
 const AnimatedDotBackground = () => {
   const [dots, setDots] = useState([]);
@@ -65,7 +70,69 @@ const AnimatedDotBackground = () => {
   );
 };
 
+const BackgroundCarousel = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [
+    "https://as2.ftcdn.net/v2/jpg/01/73/21/81/1000_F_173218114_a9aGZyRW6stMASOKVvlTscWyMsrWcdf3.jpg",
+    "https://as1.ftcdn.net/v2/jpg/02/25/72/22/1000_F_225722233_UaFHWKTZTRh5cdQVNEHz0wsvYqNOZitt.jpg",
+    "https://as2.ftcdn.net/v2/jpg/02/01/17/51/1000_F_201175173_QTZx2gCqEgu9aQlmNtUyBmgzGnQZaWqq.jpg"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-0">
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={currentImageIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
+        >
+          <img
+            src={images[currentImageIndex]}
+            alt={`Background ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const Home = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+
+
+  const programs = [
+    { name: "Caribbean", description: "Explore immigration options in the Caribbean, offering easy pathways to permanent residency and citizenship.", flag: "🇨🇦" },
+    { name: "Canada", description: "Access Canada's robust immigration programs, offering opportunities for skilled professionals, entrepreneurs, and investors.", flag: "🇨🇦" },
+    { name: "Hungary", description: "Benefit from Hungary’s Golden Visa program, which allows for residency through investment.", flag: "🇭🇺" },
+    { name: "Greece", description: "Take advantage of Greece’s Golden Visa Program, providing residency through investment in real estate.", flag: "🇬🇷" },
+    { name: "Portugal", description: "Portugal offers one of the most popular Golden Visa programs, ideal for investors seeking residency in the EU.", flag: "🇵🇹" },
+    { name: "EB-5", description: "The EB-5 program offers a pathway to permanent residency in the U.S. through investment in job-creating businesses.", flag: "🇺🇸" },
+    { name: "Turkey", description: "Turkey offers a citizenship-by-investment program with attractive opportunities in real estate and business.", flag: "🇹🇷" },
+  ];
+
+  const handleGetLeads = (program) => {
+    setSelectedProgram(program);
+    setModalOpen(true);
+  };
+
+  const handleFormSubmit = (formData) => {
+    // Handle form submission logic here
+    console.log('Form Data Submitted:', formData);
+  };
+
   const features = [
     {
       icon: Users2,
@@ -168,8 +235,10 @@ const Home = () => {
       
       <div className="relative z-10">
         {/* Hero Section */}
-        <section className="relative z-10 w-full px-4 py-12 sm:py-16 md:py-20 lg:py-24">
-          <div className="max-w-7xl mx-auto">
+        <section className="relative z-10 w-full px-4 py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden">
+          <BackgroundCarousel />
+          
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 relative">
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
@@ -195,7 +264,7 @@ const Home = () => {
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                   <Button size="lg" variant="outline" className="w-full sm:w-auto hover:bg-[#1F509A]/10 text-[#0A3981] border-[#1F509A]">
-                    Learn More
+                    Inquire Now
                   </Button>
                 </div>
               </motion.div>
@@ -214,12 +283,40 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
+        {/* Programs Section */}
+        <section className="w-full px-4 py-12 sm:py-16 md:py-20 lg:py-24">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-semibold text-center mb-8">Programs We Work on</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {programs.map((program) => (
+                <div key={program.name} className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="text-2xl font-semibold">{program.name} {program.flag}</div>
+                  <p className="mt-4 text-sm text-gray-600">{program.description}</p>
+                  <Button
+                    className="mt-6 w-full bg-blue-500 text-white"
+                    onClick={() => handleGetLeads(program)}
+                  >
+                    Get Qualified Leads
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Modal for Lead Collection */}
+        <Modal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleFormSubmit}
+        />
+
+        {/* Stats Section 
         <section className="relative z-10 w-full px-4 py-12 sm:py-16">
           <div className="max-w-7xl mx-auto bg-white/70 rounded-2xl sm:rounded-3xl shadow-lg">
             <Stats />
           </div>
-        </section>
+        </section> */}
 
         {/* Features Section */}
         <section className="relative z-10 w-full px-4 py-16 sm:py-20 lg:py-24">
@@ -259,7 +356,7 @@ const Home = () => {
         </section>
 
         {/* Pricing Section */}
-        <section className="relative z-10 w-full px-4 py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#D4EBF8] to-white">
+        <section id="pricing" className="relative z-10 w-full px-4 py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#D4EBF8] to-white">
           <div className="max-w-7xl mx-auto relative z-20">
             <div className="text-center mb-12 sm:mb-16 relative px-4">
               <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 text-[#0A3981] mb-3 sm:mb-4 text-sm sm:text-base">
@@ -310,50 +407,66 @@ const Home = () => {
         </section>
 
         {/* Testimonial Section */}
-        <section className="relative z-10 w-full px-4 py-16 sm:py-20 lg:py-24 bg-[#F8FBFE]">
+        <section id="testimonials" className="relative z-10 w-full px-4 py-16 sm:py-20 lg:py-24 bg-[#F8FBFE]">
           <div className="max-w-7xl mx-auto relative z-20">
-            <div className="text-center mb-12 sm:mb-16 relative px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-12 sm:mb-16 relative px-4"
+            >
               <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/70 text-[#0A3981] mb-3 sm:mb-4 text-sm sm:text-base">
-                Client Success Stories
+                Client Success Story
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-[#0A3981] break-words">
                 What Our Partners Say
               </h2>
-            </div>
+              <p className="text-lg text-[#1F509A]/80 max-w-2xl mx-auto">
+                Hear from our satisfied clients about their experience with Aditon Advertising
+              </p>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="bg-white p-6 rounded-lg shadow-lg"
-                >
-                  <div className="flex items-center mb-4">
-                    <Star className="text-yellow-400 w-6 h-6 mr-2" />
-                    <Star className="text-yellow-400 w-6 h-6 mr-2" />
-                    <Star className="text-yellow-400 w-6 h-6 mr-2" />
-                    <Star className="text-yellow-400 w-6 h-6 mr-2" />
-                    <Star className="text-yellow-400 w-6 h-6" />
-                  </div>
-                  <p className="text-[#1F509A]/80 mb-4">{testimonial.content}</p>
-                  <div>
-                    <p className="font-semibold text-[#0A3981]">{testimonial.name}</p>
-                    <p className="text-sm text-[#1F509A]/60">{testimonial.role}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <Testimonial
+              name="Kyle de Klerk"
+              role="Business Development Manager"
+              company="Holborn Assets LLC"
+              content="I want to express my gratitude for Aditya, our Citizenship by Investment Lead Specialist. Aditya not only delivered exceptional results as promised but exceeded our expectations. His strategic approach and industry expertise led to a substantial increase in quality leads for our program. Aditya's proactive communication and adaptability showcased his professionalism, making our collaboration seamless. We're not just satisfied with the immediate results; we're excited about the future. Our successful partnership will undoubtedly continue, and we look forward to achieving even greater milestones together."
+              image="/images/WhatsApp Image 2024-12-12 at 18.15.39.jpeg"
+            />
           </div>
         </section>
+
+        {/* Meet the Founders Section */}
+        <Founders />
+
+        {/* FAQ Section */}
         <FAQ />
+
         <PremiumCTA />
         <Footer />
+        {/* WhatsApp Sticky Button */}
+        <a
+          href="https://wa.me/+917410893130"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-4 right-4 z-50 bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors duration-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              fillRule="evenodd"
+              d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </a>
       </div>
     </div>
   );
 };
 
 export default Home;
-

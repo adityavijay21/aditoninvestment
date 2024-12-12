@@ -2,9 +2,14 @@ import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const Airplane = ({ position, rotation, speed }) => {
   const airplaneRef = useRef();
+  
+  // Load the GLB file for the airplane
+  const gltf = useLoader(GLTFLoader, '/plane_.glb_file.glb');
+
   useFrame(() => {
     if (airplaneRef.current) {
       airplaneRef.current.position.x += speed.x;
@@ -14,19 +19,18 @@ const Airplane = ({ position, rotation, speed }) => {
   });
 
   return (
-    <group ref={airplaneRef} position={position} rotation={rotation}>
-      <mesh>
-        <boxGeometry args={[0.1, 0.05, 0.2]} />
-        <meshStandardMaterial color="#FFFFFF" />
-      </mesh>
-      <mesh position={[0, 0.02, 0]}>
-        <boxGeometry args={[0.3, 0.02, 0.05]} />
-        <meshStandardMaterial color="#DDDDDD" />
-      </mesh>
-      <mesh position={[0, 0.03, -0.1]}>
-        <boxGeometry args={[0.05, 0.1, 0.05]} />
-        <meshStandardMaterial color="#CCCCCC" />
-      </mesh>
+    <group ref={airplaneRef} position={position} rotation={rotation} scale={[0.03, 0.03, 0.03]}>
+      <primitive 
+        object={gltf.scene} 
+        onAfterRender={(renderer) => {
+          // Traverse through the model and change color to white
+          gltf.scene.traverse((child) => {
+            if (child.isMesh) {
+              child.material.color = new THREE.Color(1, 1, 1); // Pure white
+            }
+          });
+        }}
+      />
     </group>
   );
 };
@@ -34,35 +38,33 @@ const Airplane = ({ position, rotation, speed }) => {
 const Globe = () => {
   const globeRef = useRef();
   const [airplanes, setAirplanes] = useState([]);
-  const [textureLoaded, setTextureLoaded] = useState(false);
+  const [modelLoaded, setModelLoaded] = useState(false);
 
-  const texture = useLoader(THREE.TextureLoader, '/earth.jpg', (loader) => {
-    loader.crossOrigin = 'anonymous';
-  });
+  // Load the Earth GLB file
+  const gltf = useLoader(GLTFLoader, '/earth.glb');
 
   useEffect(() => {
-    if (texture) {
-      texture.needsUpdate = true;
-      setTextureLoaded(true);
+    if (gltf) {
+      setModelLoaded(true);
     }
-  }, [texture]);
+  }, [gltf]);
 
   useEffect(() => {
     setAirplanes([
       { 
-        position: [1.2, 0.5, 0.5], 
-        rotation: [0, Math.PI/4, 0],
-        speed: { x: 0.005, y: 0.005, z: 0.005 },
+        position: [0.6, 0.3, 0.3], 
+        rotation: [0, Math.PI / 4, 0],
+        speed: { x: 0.003, y: 0.003, z: 0.003 },
       },
       { 
-        position: [-1.2, -0.3, -0.7], 
-        rotation: [0, -Math.PI/4, 0],
-        speed: { x: -0.005, y: -0.005, z: -0.005 },
+        position: [-0.6, -0.2, -0.4], 
+        rotation: [0, -Math.PI / 4, 0],
+        speed: { x: -0.003, y: -0.003, z: -0.003 },
       },
       { 
-        position: [0.8, -0.6, 0.3], 
-        rotation: [0, Math.PI/2, 0],
-        speed: { x: 0.005, y: -0.005, z: 0.005 },
+        position: [0.4, -0.3, 0.2], 
+        rotation: [0, Math.PI / 2, 0],
+        speed: { x: 0.003, y: -0.003, z: 0.003 },
       }
     ]);
   }, []);
@@ -72,25 +74,26 @@ const Globe = () => {
       globeRef.current.rotation.y = clock.getElapsedTime() * 0.05;
     }
 
-    setAirplanes(prev => prev.map(airplane => {
+    setAirplanes((prev) => prev.map((airplane) => {
       const newPosition = [...airplane.position];
       newPosition[0] += airplane.speed.x;
       newPosition[1] += airplane.speed.y;
       newPosition[2] += airplane.speed.z;
       
-      if (Math.sqrt(newPosition[0]**2 + newPosition[1]**2 + newPosition[2]**2) > 1.8) {
+      // If the airplane goes too far, reset its position
+      if (Math.sqrt(newPosition[0] ** 2 + newPosition[1] ** 2 + newPosition[2] ** 2) > 1) {
         const randomAngle = Math.random() * Math.PI * 2;
         return { 
           ...airplane, 
           position: [
-            1.5 * Math.sin(randomAngle) * Math.cos(randomAngle),
-            1.5 * Math.sin(randomAngle) * Math.sin(randomAngle),
-            1.5 * Math.cos(randomAngle)
+            0.8 * Math.sin(randomAngle) * Math.cos(randomAngle),
+            0.8 * Math.sin(randomAngle) * Math.sin(randomAngle),
+            0.8 * Math.cos(randomAngle)
           ],
           speed: { 
-            x: (Math.random() - 0.5) * 0.01, 
-            y: (Math.random() - 0.5) * 0.01, 
-            z: (Math.random() - 0.5) * 0.01 
+            x: (Math.random() - 0.5) * 0.006, 
+            y: (Math.random() - 0.5) * 0.006, 
+            z: (Math.random() - 0.5) * 0.006 
           }
         };
       }
@@ -101,14 +104,9 @@ const Globe = () => {
 
   return (
     <>
-      <mesh ref={globeRef} scale={[1.5, 1.5, 1.5]}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshStandardMaterial 
-          map={textureLoaded ? texture : null}
-          roughness={0.5}
-          metalness={0.1}
-        />
-      </mesh>
+      <group ref={globeRef} position={[0, 0, 0]} scale={[0.7, 0.7, 0.7]}>
+        {modelLoaded && <primitive object={gltf.scene} />}
+      </group>
 
       {airplanes.map((airplane, index) => (
         <Airplane 
@@ -131,7 +129,7 @@ const Globe3D = () => {
           fov: window.innerWidth < 640 ? 70 : 60 
         }}
       >
-        <ambientLight intensity={0.3} />
+        <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1.5} />
         <Stars radius={300} depth={60} count={5000} factor={7} saturation={0} fade />
         <Suspense fallback={null}>

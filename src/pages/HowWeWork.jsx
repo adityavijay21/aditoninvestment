@@ -58,7 +58,7 @@ const HowWeWork = () => {
               Discover our proven process for delivering high-quality HNWI leads for immigration programs
             </p>
             <Button size="lg" className="bg-[#E38E49] hover:bg-[#1F509A] text-white">
-              Get Started Today
+              Inquire Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
